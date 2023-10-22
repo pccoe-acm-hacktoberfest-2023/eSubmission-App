@@ -31,21 +31,22 @@
     height: 300px;
 }
 
-.navbar-nav{
-    display: flex;
-    align-items: flex-end;
-    margin-left: auto;
+.navbar-nav {
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center; 
+  margin: 0 auto; 
+  width: 100%;
 }
 
-.nav-nav:hover{
-
-    border-bottom: 3px solid rgb(245, 245, 251);
-    border-top: 2px solid white;
+.nav-item {
+  margin: 0 10px; 
 }
 
-
-
-/* modal css  */
+.nav-nav:hover {
+  border-bottom: 3px solid rgb(245, 245, 251);
+  border-top: 2px solid white;
+}
 
 * {box-sizing: border-box}
 
