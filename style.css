@@ -33,7 +33,7 @@
 
 .navbar-nav{
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     margin-left: auto;
 }
 
