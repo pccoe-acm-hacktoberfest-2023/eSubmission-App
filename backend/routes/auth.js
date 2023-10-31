@@ -3,6 +3,7 @@ const bypass = require("../middleware/bypass");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Student = require("../model/Student");
+const sendEmail = require("../utils/sendEmail");
 const router = express.Router();
 
 require("dotenv").config()
@@ -36,8 +37,10 @@ router.post("/create",bypass,async(req,res)=>{
           email: req.body.email,
           password: secPass,
         });
-
-        console.log(user);
+        
+        const baseURL = req.protocol+"://"+req.headers.host;
+        let body = baseURL+"/auth/verify/"+user.id;
+        sendEmail(user,body)
         success = 1;
         message = "Account created successfully!"
         res.status(200).json({ success ,message});
@@ -62,6 +65,16 @@ router.post("/login",bypass,async(req,res)=>{
           .json({ success ,message: "Please Login with correct Credentials" });
       }
 
+      if(!student.verified){
+        
+        const baseURL = req.protocol+"://"+req.headers.host;
+        let body = baseURL+"/auth/verify/"+student.id;
+        sendEmail(student,body)
+        return res
+          .status(303)
+          .json({ success ,message: "Kindly Verify your Email ID" });
+      }
+
       //Comparing password
       let passwordMatches = await bcrypt.compare(password, student.password);
 
@@ -84,7 +97,38 @@ router.post("/login",bypass,async(req,res)=>{
       success = 1;
       res.status(200).json({ success,authtoken });
     } catch (error) {
+      console.log(error)
       res.status(500).json(error);
+    }
+})
+
+const nomiddleware = (req,res,next) =>{
+  next();
+}
+
+router.get("/verify/:id",nomiddleware,async (req,res)=>{
+    try {
+      let student = await Student.findOne({_id : req.params.id});
+
+      if(!student || student.verified == true) {
+        return res.status(400).send("Invalid Link")
+      }
+      
+      console.log(student);
+
+      let nstudent = await Student.findByIdAndUpdate( 
+                { _id: req.params.id }, 
+                { 
+                    verified: "true"
+                } 
+            ); 
+
+      console.log(nstudent);
+
+      res.send("Email Verified");
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({"success":0,"message":"Internal Error Occurred!"})
     }
 })
 
